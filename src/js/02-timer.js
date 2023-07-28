@@ -2,6 +2,7 @@ import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
 const refs = {
+    input: document.querySelector('#datetime-picker'),
     startBtn: document.querySelector('button[data-start]'),
     days: document.querySelector('.value[data-days]'),
     hours: document.querySelector('.value[data-hours]'),
@@ -18,8 +19,8 @@ const fp = flatpickr("#datetime-picker", {
     defaultDate: new Date(),
     minuteIncrement: 1,
     onClose(selectedDates) {
-        // const deltaDate = selectedDates[0] - this.defaultDate;
-        if (selectedDates[0] < this.defaultDate) {
+        const deltaDate = selectedDates[0] - Date.now();
+        if (deltaDate < 0) {
             return alert('Please choose a date in the future');
         } else {
             refs.startBtn.removeAttribute('disabled');
@@ -35,6 +36,11 @@ class Timer {
             const currentTime = Date.now();
             const deltaTime = startTime - currentTime;
             const { days, hours, minutes, seconds } = this.convertMs(deltaTime);
+
+            if (deltaTime < 1000) {
+                clearInterval(this.intervalId);
+                refs.startBtn.disabled = false;
+            }
             
             refs.days.textContent = this.addLeadingZero(`${days}`);
             refs.hours.textContent = this.addLeadingZero(`${hours}`);
@@ -68,15 +74,12 @@ class Timer {
     };
 
     start() {
-
     };
-
-    stop() {
-        clearInterval(this.intervalId);
-    };  
 }
 
 function onClickStartBtn() {
     const timer = new Timer();
     timer.start();
+    refs.input.disabled = true;
+    refs.startBtn.disabled = true;
 };
